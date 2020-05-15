@@ -19,15 +19,16 @@ class Product(models.Model):
     image_url = models.URLField(max_length=2000)
     sub_name = models.CharField(max_length=50)
     price = models.IntegerField(default=0)
-    heder_image_url = models.URLField(max_length=2000)
-    heder_description = models.CharField(max_length=500)
+    header_image_url = models.URLField(max_length=2000)
+    header_description = models.CharField(max_length=500)
     day = models.CharField(max_length=30)
-    pill_image_url = models.URLField(max_length=2000)
-    pill_description = models.CharField(max_length=100)
-    pill_sub_description = models.CharField(max_length=100)
-    pill_sub_image_url = models.URLField(max_length=2000)
-    ingredient = models.TextField()
-    manual_url = models.URLField(max_length=2000)
+    pill_image_url = models.URLField(max_length=2000, null=True)
+    pill_description = models.CharField(max_length=100, null=True)
+    pill_sub_description = models.CharField(max_length=100, null=True)
+    pill_sub_image_url = models.URLField(max_length=2000, null=True)
+    ingredient = models.TextField(null=True)
+    manual_url = models.URLField(max_length=2000, null=True)
+    color = models.CharField(max_length=50)
     product_category = models.ManyToManyField('Category', through='ProductCategory')
     product_account = models.ManyToManyField('account.Account', through='Subscription')
     product_review = models.ManyToManyField('Review', through='ProductReview')
@@ -58,9 +59,10 @@ class ProductReview(models.Model):
 
 class Review(models.Model):
     name = models.CharField(max_length=100)
+    product_list = models.CharField(max_length=200)
     image_url = models.URLField(max_length=2000)
     subscription = models.CharField(max_length=100)
-    created_at = models.DateTimeField()
+    created_at = models.CharField(max_length=100)
     content = models.TextField()
 
     class Meta:
@@ -69,10 +71,10 @@ class Review(models.Model):
 class Section(models.Model):
     product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True)
     bottle = models.TextField()
-    title = models.TextField()
-    effects = models.TextField()
-    point = models.TextField()
-    video_url = models.URLField(max_length=2000)
+    title = models.TextField(null=True)
+    effects = models.TextField(null=True)
+    point = models.TextField(null=True)
+    video_url = models.URLField(max_length=2000, null=True)
 
     class Meta:
         db_table = 'sections'
