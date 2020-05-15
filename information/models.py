@@ -62,10 +62,10 @@ class Home(models.Model):
     class Meta:
         db_table = 'homes'
 
-class ProductsHeader(models.Model):
+class ProductHeader(models.Model):
     image_url = models.URLField(max_length=2000)
     title = models.CharField(max_length=100)
     content = models.CharField(max_length=100)
 
     class Meta:
-        db_table = 'products_headers'
+        db_table = 'product_headers'
