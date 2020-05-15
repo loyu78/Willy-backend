@@ -11,12 +11,12 @@ class PointProductList(View):
 		products = PointProduct.objects.values()
 		point_products = [
 			{
-				'id':product.id,
-				'brand':product.brand,
-				'hashtag':product.hashtag,
-				'name':product.name,
-				'point':product.price,
-				'image_url':product.image_url
+				'id':product['id'],
+				'brand':product['brand'],
+				'hashtag':product['hashtag'],
+				'name':product['name'],
+				'point':product['price'],
+				'image_url':product['image_url']
 			} for product in products
 		]
 		return JsonResponse({'point_products':point_products}, status=200)
