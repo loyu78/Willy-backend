@@ -12,7 +12,7 @@ class SurveyQuestion(models.Model):
     sub_question = models.CharField(max_length=200)
     image_url = models.URLField(max_length=2000)
     limit = models.IntegerField(default=1)
-    surveyquetion_surveyanswer = models.ManyToManyField('Surveyanswer', through='NextAnswer')
+    surveyquetion_surveyanswer = models.ManyToManyField('Surveyanswer', through='NextQuestion')
 
     class Meta:
         db_table = 'survey_questions'
@@ -24,12 +24,12 @@ class SurveyAnswer(models.Model):
     class Meta:
         db_table = 'survey_answers'
 
-class NextAnswer(models.Model):
+class NextQuestion(models.Model):
     survey_answer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
     survey_question = models.ForeignKey('SurveyQuestion', on_delete=models.SET_NULL, null=True)
 
     class Meta:
-        db_table = 'next_answers'
+        db_table = 'next_questions'
 
 class SuitablePill(models.Model):
     surveyanswer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
