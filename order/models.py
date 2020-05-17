@@ -12,7 +12,7 @@ class Order(models.Model):
     postal_code = models.CharField(max_length=20)
     road_address = models.CharField(max_length=100)
     detail_address = models.CharField(max_length=100)
-    messege = models.TextField()
+    messege = models.TextField(null=True)
     point = models.IntegerField(default=0)
     order_number = models.CharField(max_length=50)
     created_at = models.DateTimeField

@@ -23,7 +23,7 @@ class Account(models.Model):
         
 class Recommender(models.Model):
     account = models.ForeignKey('Account', on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=True)
 
     class Meta:
         db_table = 'recommenders'

@@ -10,8 +10,8 @@ class SurveyQuestion(models.Model):
     survey_type = models.ForeignKey('SurveyType', on_delete=models.SET_NULL, null=True)
     question = models.CharField(max_length=200)
     sub_question = models.CharField(max_length=200)
-    image_url = models.URLField(max_length=2000)
-    limit = models.IntegerField(default=1)
+    image_url = models.URLField(max_length=2000, null=True)
+    limit = models.CharField(max_length=30, null=True)
     surveyquetion_surveyanswer = models.ManyToManyField('Surveyanswer', through='NextQuestion')
 
     class Meta:
@@ -32,8 +32,8 @@ class NextQuestion(models.Model):
         db_table = 'next_questions'
 
 class SuitablePill(models.Model):
-    surveyanswer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
-    recommendedproduct = models.ForeignKey('RecommendedProduct', on_delete=models.SET_NULL, null=True)
+    survey_answer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
+    recommended_product = models.ForeignKey('RecommendedProduct', on_delete=models.SET_NULL, null=True)
 
     class Meta:
         db_table = 'suitable_pills'
@@ -74,14 +74,15 @@ class RecommendedProduct(models.Model):
     title = models.CharField(max_length=200)
     rating = models.DecimalField(max_digits=2, decimal_places=1)
     content = models.TextField()
+    highlight = models.CharField(max_length=500)
     recommendedproduct_surveyanswer = models.ManyToManyField('SurveyAnswer', through='SuitablePill')
 
     class Meta:
         db_table = 'recommended_products'
 
 class ImageDescription(models.Model):
-    recommendedproduct = models.ForeignKey('RecommendedProduct', on_delete=models.SET_NULL, null=True)
-    content = models.CharField(max_length=200)
+    recommended_product = models.ForeignKey('RecommendedProduct', on_delete=models.SET_NULL, null=True)
+    content = models.CharField(max_length=300)
 
     class Meta:
         db_table = 'image_descriptions'
@@ -101,11 +102,12 @@ class ResultList(models.Model):
     class Meta:
         db_table = 'result_lists'
 
-class ProductsContent(models.Model):
+class ProductContent(models.Model):
     recommended_product = models.ForeignKey('RecommendedProduct', on_delete=models.SET_NULL, null=True)
-    title = models.CharField(max_length=45)
-    content = models.CharField(max_length=45)
+    title = models.CharField(max_length=1000)
+    content = models.CharField(max_length=1000)
+    highlight = models.CharField(max_length=500)
     link = models.TextField()
 
     class Meta:
-        db_table = 'products_contents'
+        db_table = 'product_contents'
