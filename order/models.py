@@ -1,29 +1,37 @@
 from django.db import models
 
+
 class Order(models.Model):
-    account = models.ForeignKey('account.Account', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True)
+    order_status = models.ForeignKey('OrderStatus', on_delete=models.SET_NULL, null=True)
     delvery_status = models.ForeignKey('DeliveryStatus', on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=50)
-    mobile_number = models.CharField(max_length=30)
-    email = models.EmailField(max_length=50, unique=True)
-    recipient_name = models.CharField(max_length=50)
-    recipient_mobile = models.CharField(max_length=30)
-    postal_code = models.CharField(max_length=20)
-    road_address = models.CharField(max_length=100)
-    detail_address = models.CharField(max_length=100)
+    name = models.CharField(max_length=50, null=True)
+    mobile_number = models.CharField(max_length=30, null=True)
+    email = models.EmailField(max_length=50, unique=True, null=True)
+    recipient_name = models.CharField(max_length=50, null=True)
+    recipient_mobile = models.CharField(max_length=30, null=True)
+    postal_code = models.CharField(max_length=20, null=True)
+    road_address = models.CharField(max_length=100, null=True)
+    detail_address = models.CharField(max_length=100, null=True)
     messege = models.TextField(null=True)
     point = models.IntegerField(default=0)
-    order_number = models.CharField(max_length=50)
+    order_number = models.CharField(max_length=50, null=True)
     created_at = models.DateTimeField
-    password = models.CharField(max_length=150)
+    password = models.CharField(max_length=150, null=True)
     identification = models.BooleanField(default=1)
-    shopping_charge = models.IntegerField(default=0)
     subscription = models.BooleanField(default=0)
     order_product = models.ManyToManyField('product.Product', through='Cart')
+    status = models.BooleanField(default=0)
 
     class Meta:
         db_table = 'orders'
+
+class OrderStatus(models.Model):
+    status = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'order_status'
 
 class DeliveryStatus(models.Model):
     status = models.CharField(max_length=50)
@@ -40,11 +48,10 @@ class Payment(models.Model):
 class Cart(models.Model):
     order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
-    count = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1)
     amount = models.IntegerField(default=0)
     survey_discount = models.IntegerField(default=0)
     invitation_discount = models.IntegerField(default=0)
-    status = models.BooleanField(default=1)
 
     class Meta:
         db_table = 'carts'

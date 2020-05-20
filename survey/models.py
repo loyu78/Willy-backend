@@ -46,7 +46,7 @@ class SurveyComent(models.Model):
         db_table = 'survey_coment'
 
 class CustomerInformation(models.Model):
-    account = models.ForeignKey('account.Account', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=50)
     gender = models.CharField(max_length=10)
     age = models.IntegerField(default=0)

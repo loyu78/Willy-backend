@@ -4,7 +4,7 @@ class PillyNews(models.Model):
     news_type = models.ForeignKey('NewsType', on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=50)
     content = models.TextField()
-    created_at = models.DateTimeField()
+    created_at = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'pilly_news'
@@ -19,7 +19,7 @@ class Question(models.Model):
     question_type = models.ForeignKey('QuestionType', on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=100)
     content = models.TextField()
-    created_at = models.DateTimeField()
+    created_at = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'questions'

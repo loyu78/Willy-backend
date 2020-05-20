@@ -1,13 +1,14 @@
 from django.db import models
 
-class Account(models.Model):
-    name = models.CharField(max_length=50)
-    mobile_number = models.CharField(max_length=30)
-    email = models.EmailField(max_length=50, unique=True)
-    password = models.CharField(max_length=150)
+class User(models.Model):
+    anonymous = models.CharField(max_length=50, null=True, unique=True)
+    name = models.CharField(max_length=50, null=True)
+    mobile_number = models.CharField(max_length=30, null=True)
+    email = models.EmailField(max_length=50, unique=True, null=True)
+    password = models.CharField(max_length=150, null=True)
     terms = models.BooleanField(default=0)
     agreement = models.BooleanField(default=0)
-    invitation_code = models.CharField(max_length=15)
+    invitation_code = models.CharField(max_length=15, null=True)
     point = models.IntegerField(default=0)
     postal_code = models.CharField(max_length=20, null=True)
     road_address = models.CharField(max_length=100, null=True)
@@ -18,17 +19,17 @@ class Account(models.Model):
     account_deliverystatus = models.ManyToManyField('order.DeliveryStatus', through='order.Order')
 
     class Meta:
-        db_table = 'accounts'
+        db_table = 'users'
 
 class Recommender(models.Model):
-    account = models.ForeignKey('Account', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=50, null=True)
 
     class Meta:
         db_table = 'recommenders'
 
 class Prescription(models.Model):
-    account = models.ForeignKey('Account', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('User', on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField()
 

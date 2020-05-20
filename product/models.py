@@ -16,6 +16,7 @@ class ProductCategory(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=50)
+    subscribe = models.BooleanField(default=1)
     image_url = models.URLField(max_length=2000)
     sub_name = models.CharField(max_length=50)
     price = models.IntegerField(default=0)
@@ -30,7 +31,7 @@ class Product(models.Model):
     manual_url = models.URLField(max_length=2000, null=True)
     color = models.CharField(max_length=50)
     product_category = models.ManyToManyField('Category', through='ProductCategory')
-    product_account = models.ManyToManyField('account.Account', through='Subscription')
+    product_user = models.ManyToManyField('user.User', through='Subscription')
     product_review = models.ManyToManyField('Review', through='ProductReview')
 
     class Meta:
@@ -39,12 +40,14 @@ class Product(models.Model):
 class ProductExplanation(models.Model):
     product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True)
     content = models.CharField(max_length=200)
+    sub_content = models.CharField(max_length=200)
+    product_content = models.CharField(max_length=200)
 
     class Meta:
         db_table = 'product_explanations'
 
 class Subscription(models.Model):
-    account = models.ForeignKey('account.Account', on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True)
 
     class Meta:

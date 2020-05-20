@@ -1,3 +1,71 @@
-from django.shortcuts import render
+import json
+import uuid
 
-# Create your views here.
+from django.http    import JsonResponse, HttpResponse
+from django.views   import View
+from django.db.models import Sum
+from django.db.models import Count
+
+from .models import Order, Cart
+from product.models import Product
+from user.models import User
+from user.utils import sign_in_auth
+
+class CartView(View):
+	@sign_in_auth
+	def post(self, request):
+		data = json.loads(request.body)
+		if 'product_id' in data:
+			product_id = data['product_id']
+			product = Product.objects.get(id=product_id)
+			user = request.user
+
+			if Order.objects.filter(user_id=user.id, order_status_id=1).exists():
+				order_id = Order.objects.get(user_id=user.id).id
+			else:
+				Order.objects.create(
+					user_id = User.objects.get(id=user.id).id,
+					order_status_id = 1
+				)
+
+			order_id = Order.objects.get(user_id=user.id).id
+			carts = Cart.objects.filter(order_id=order_id)
+			if carts.filter(product_id=product_id).exists():
+				c_product = carts.get(product_id=product_id)
+				c_product.quantity = c_product.quantity + 1
+				c_product.amount = c_product.amount + product.price
+				c_product.save()
+			else:
+				Cart(
+					order_id = order_id,
+					product_id = data['product_id'],
+					amount = product.price,
+				).save()
+
+			data_attribute = [
+				{
+					'id': cart.id,
+					'quantity': cart.quantity,
+					'product_id':cart.product.id,
+					'name': cart.product.name,
+					'type': cart.product.subscribe,
+					'image': cart.product.image_url,
+					'price': cart.amount
+				} for cart in carts
+
+			]
+			subscribe_total_price = [
+				carts.filter(product__subscribe=True).aggregate(Sum('amount'))
+			]
+			disposable_total_price = [
+				carts.filter(product__subscribe=False).aggregate(Sum('amount'))
+			]
+			total_price = [
+				carts.aggregate(Sum('amount'))
+			]
+			return JsonResponse({'products':data_attribute, 'subscribe_total_price':subscribe_total_price, 'disposable_total_price':disposable_total_price,'total_price':total_price}, status=200)
+			
+class RemoveProduct(View):
+	def get(self, request):
+		Cart.objects.all().delete()
+		return JsonResponse({'message':'remove susscess'}, status=200)
