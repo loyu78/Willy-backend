@@ -14,35 +14,38 @@ from user.utils       import sign_in_auth
 class CartView(View):
 	@sign_in_auth
 	def post(self, request):
-		data = json.loads(request.body)
-		if 'product_id' in data:
-			product_id = data['product_id']
-			product = Product.objects.get(id=product_id)
-			user = request.user
+		try:
+			data = json.loads(request.body)
+			if 'product_id' in data:
+				product_id = data['product_id']
+				product = Product.objects.get(id=product_id)
+				user = request.user
 
-			if Order.objects.filter(user_id=user.id, order_status_id=1).exists():
+				if Order.objects.filter(user_id=user.id, order_status_id=1).exists():
+					order_id = Order.objects.get(user_id=user.id).id
+				else:
+					Order.objects.create(
+						user_id = User.objects.get(id=user.id).id,
+						order_status_id = 1
+					)
+
 				order_id = Order.objects.get(user_id=user.id).id
-			else:
-				Order.objects.create(
-					user_id = User.objects.get(id=user.id).id,
-					order_status_id = 1
-				)
-
-			order_id = Order.objects.get(user_id=user.id).id
-			carts = Cart.objects.filter(order_id=order_id)
-			if carts.filter(product_id=product_id).exists():
-				cart_product = carts.get(product_id=product_id)
-				cart_product.quantity = cart_product.quantity + 1
-				cart_product.amount = cart_product.amount + product.price
-				cart_product.save()
-			else:
-				Cart(
-					user_id = user.id,
-					order_id = order_id,
-					product_id = data['product_id'],
-					amount = product.price,
-				).save()
-			return JsonResponse({'message':'success'}, status=200)
+				carts = Cart.objects.filter(order_id=order_id)
+				if carts.filter(product_id=product_id).exists():
+					cart_product = carts.get(product_id=product_id)
+					cart_product.quantity = cart_product.quantity + 1
+					cart_product.amount = cart_product.amount + product.price
+					cart_product.save()
+				else:
+					Cart(
+						user_id = user.id,
+						order_id = order_id,
+						product_id = data['product_id'],
+						amount = product.price,
+					).save()
+				return JsonResponse({'message':'success'}, status=200)
+		except KeyError:
+			return JsonResponse({'message':'key error'}, status=200)
 
 	@sign_in_auth
 	def get(self, request):
