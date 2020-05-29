@@ -1,21 +1,23 @@
-import json, bcrypt, jwt ,re ,time,requests,random,string,redis
 import hashlib
 import hmac
 import base64
+import json, bcrypt, jwt 
+import re ,time,requests,
+import random,string,redis
 
-from random import randint
-from threading import Timer
-from django.views import View
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.db import IntegrityError
-from datetime import timedelta, datetime
-from django.utils import timezone 
+from random           import randint
+from threading        import Timer
+from django.views     import View
+from django.http      import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.db        import IntegrityError
+from datetime         import timedelta, datetime
+from django.utils     import timezone
 from django.shortcuts import redirect, render
 
 from willy.settings import SECRET_KEY, ACCESS_KEY, ACCESS_URI
-from .utils import make_signature, sign_in_auth
-from .models import Authentication, User,Social
-from .models import PointProduct, PointImageList
+from .utils         import make_signature, sign_in_auth
+from .models        import Authentication, User,Social
+from .models        import PointProduct, PointImageList
 
 class PointProductList(View):
 	def get(self, request):
@@ -52,74 +54,70 @@ class PointProductDetail(View):
 			return JsonResponse({'message':'KeyError'}, status=400)
 
 class SignUpView(View): 
+    EMAIL_VALIDATION_RULE    = "\w+@\w+\.[\w+]{2,3}$"
+    PASSWORD_VALIDATION_RULE = re.compile('[\w!@#$%]{5,20}')
+    VALIDATION_RULES         = {
+        'email'           : lambda email: len(re.findall(EMAIL_VALIDATION_RULE, email)) == 0,
+        'mobile_number'   : lambda mobile_number: len(re.findall('\D',mobile_number)) > 0,
+        'terms'           : lambda terms: terms,
+        'mobile_agreement': lambda mobile_agreement: mobile_agreement, 
+        'password'        : lambda password: len(PASSWORD_VALIDATION_RULE.match(password).group()) == 0,
+    }
+    KAKAO_VALIDATION_RULES = VALIDATION_RULES.pop('password')
+
     def post(self,request):
-        data = json.loads(request.body)
-        pattern1 = "\w+@\w+\.[\w+]{2,3}$"
-        pattern2 = re.compile('[\w!@#$%]{5,20}')
-        if data['social_type'] == "1" :
-            VALI1 = {
-                'email'              : lambda email              : True if len(re.findall(pattern1,email)) == 0 or len(email) == 0 or User.objects.filter(email = email).exists() else False,
-                'mobile_number'      : lambda mobile_number      : True if len(re.findall('\D',mobile_number)) > 0 or User.objects.filter(mobile_number= mobile_number).exists()  else False,
-                'terms'              : lambda terms              : True if terms == "0" else False, # 이용 약관 동의 여부 둘다 동의시 1 하나라도 미동의시 0
-                'mobile_agreement'   : lambda mobile_agreement   : True if mobile_agreement == "0" else False, # 핸드폰 인증여부 인증시 1 미인증시 0
-                'password'           : lambda password           : True if len(pattern2.match(password).group()) == 0 else False,
-            }
-            try:
-                for column,action in VALI1.items():
-                    if action(data[column]):
-                        return JsonResponse({'message' : f'회원가입 실패 Failed : {column}'},status=400)
-                hashed_pass = bcrypt.hashpw(data['password'].encode('utf-8'),bcrypt.gensalt())
-                User( 
-                    name            = data['name'],
-                    mobile_number   = data['mobile_number'],
-                    email           = data['email'],
-                    password        = hashed_pass.decode('utf-8'),
-                    invitation_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
-                    mobile_agreement= data['mobile_agreement'],
-                    terms           = data['terms'],
-                    agreement       = data['agreement'],
-                    social_login_id = data['social_type'],
-                ).save()
-                return JsonResponse({'message' : '회원가입 완료'},status=200)
-            except:
-                return JsonResponse({'message' : 'INVALID_KEYS'},status=400)
-        elif data['social_type'] != "1":
-            VALI2 = {
-                'email'              : lambda email              : True if len(re.findall(pattern1,email)) == 0 or len(email) == 0 or User.objects.filter(email = email).exists() else False,
-                'mobile_number'      : lambda mobile_number      : True if len(re.findall('\D',mobile_number)) > 0 or User.objects.filter(mobile_number= mobile_number).exists()  else False,
-                'terms'              : lambda terms              : True if terms == "0"                                                                                           else False, # 이용 약관 동의 여부 둘다 동의시 1 하나라도 미동의시 0
-                'mobile_agreement'   : lambda mobile_agreement   : True if mobile_agreement == "0"                                                                                else False, # 핸드폰 인증여부 인증시 1 미인증시 0
-            }
-            try:
-                for column,action in VALI2.items():
-                    if action(data[column]):
-                        return JsonResponse({'message' : f'회원가입 실패 Failed : {column}'},status=400)
-                User(
-                    name            = data['name'],
-                    mobile_number   = data['mobile_number'],
-                    email           = data['email'],
-                    invitation_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
-                    mobile_agreement= data['mobile_agreement'],
-                    terms           = data['terms'],
-                    agreement       = data['agreement'],
-                    social_login_id = data['social_type'],
-                    social_id       = data['social_id'],
-                ).save()
-                return JsonResponse({'message' : '회원가입 완료'},status=200)
-            except:
-                return JsonResponse({'message' : 'INVALID_KEYS'},status=400)
-                
+        data       = json.loads(request.body)
+        is_kakao   = data['social_type'] == 'KAKAO'
+        validation = KAKAO_VALIDATION_RULES if is_kakao else VALIDATION_RULES
+
+        try:
+            for column, action in validation.items():
+                if action(data[column]):
+                    return JsonResponse({'message' : f'회원가입 실패 Failed : {column}'}, status=400)
+
+            hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'),bcrypt.gensalt())
+            User(
+                name            = data['name'],
+                mobile_number   = data['mobile_number'],
+                email           = data['email'],
+                password        = hashed_pass.decode('utf-8') if not is_kakao else None,
+                invitation_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
+                mobile_agreement= data['mobile_agreement'],
+                terms           = data['terms'],
+                agreement       = data['agreement'],
+                social_login_id = data['social_type'],
+                social_id       = data['social_id'] if is_kakao else None
+            ).save()
+            return JsonResponse({'message' : '회원가입 완료'},status=200)
+        except KeyError:
+            return JsonResponse({'message' : 'INVALID_KEYS'},status=400)
+        except User.IntegrationException:
+            return JsonResponse({'message' : 'User Already Exists'},status=401)
+
 class SignInView(View):
     def post(self, request):
         data = json.loads(request.body)
         judge = {}
-        for i in data:
-            if len(data[i]) == 0:
+        
+        for field in data:
+            if len(data[field]) == 0:
                 judge[i] = True
         if len(judge) == 2 and 'password' in judge:
             return JsonResponse({"message": "패스워드를 입력 해주세요."},status=400)
         if len(judge) == 3 :
             return JsonResponse({"message": "로그인 정보를 입력 해 주세요."},status=400)
+
+        email        = data.get('email')
+        phone_number = data.get('phone_number')
+
+        if email:
+            user = User....
+        else:
+            user = User...
+
+
+
+
         if 'mobile_number' in judge:
             try:
                 if User.objects.filter(email = data['email']).exists():
@@ -153,6 +151,7 @@ class SignInView(View):
 
 class SmsSendView(View):
     timestamp = str(int(time.time() * 1000))
+
     def send_sms(self, mobile_number, auth_number):
         headers = {
             'Content-Type'            : "application/json; charset=UTF-8",
@@ -168,66 +167,73 @@ class SmsSendView(View):
             "messages": [{"to": f"{mobile_number}"}]
         }
         body = json.dumps(body)
-        response = requests.post(ACCESS_URI, headers = headers , data = body)
+        response = requests.post(ACCESS_URI, headers = headers , data = body, timeout = 3)
         
     def post(self, request):
-        data = json.loads(request.body)
-        try:
-            input_mobile_num        = data['mobile_number']
-            auth_num                = randint(10000,100000)
-            auth_mobile             = Authentication.objects.get(mobile_number = input_mobile_num)
-            auth_mobile.auth_number = auth_num
-            auth_mobile.save()
-            self.send_sms(mobile_number = data['mobile_number'], auth_number = auth_num)
-            return JsonResponse({'message':'인증 번호 발송'}, status=200)
-        except Authentication.DoesNotExist:
-            Authentication.objects.create(
-                mobile_number = input_mobile_num,
-                auth_number   = auth_num,
-            ).save()
-            self.send_sms(mobile_number = input_mobile_num, auth_number = auth_num)
-            return JsonResponse({'message':'인증 번호 발송'}, status=200)
+        data             = json.loads(request.body)
+        input_mobile_num = data['mobile_number']
+        auth_num         = randint(10000,100000)
+
+        Authentication.objects.create(
+            mobile_number = input_mobile_num,
+            auth_number   = auth_num,
+        ).save()
+        self.send_sms(mobile_number = input_mobile_num, auth_number = auth_num)
+
+        return JsonResponse({'message':'인증 번호 발송'}, status=200)
 
 class VerificationView(View):
     def post(self, request):
         data = json.loads(request.body)
-        try:
-            verifi = Authentication.objects.get(mobile_number=data['mobile_number'])
-            if verifi.auth_number == data['auth_number']:
-                return JsonResponse({'message': '인증 완료'},status=200)
-            else:
-                return JsonResponse({'message': '인증 실패'},status=400)
-        except Authentication.DoesNotExist:
-            return JsonResponse({'message' : '인증 오류'},status=400)
-        
+
+        if Authentication.objects.filter(
+            mobile_number = data['mobile_number'],
+            auth_number   = data['auth_number']
+        ).exists():
+            return JsonResponse({'message': '인증 완료'},status=200)
+        else:
+            return JsonResponse({'message': '인증 실패'},status=401)
+    
 class MyPageView(View):
     @sign_in_auth
     def get(self,request):
         try:
-            data = User.objects.filter(id = request.user.id).values('email','mobile_number','name','agreement','invitation_code','discount')
-            return JsonResponse({"user_profile" : list(data)},status=200)
-        except KeyError:
-            return JsonResponse({"message" : "유저 정보가 일치하지 않습니다."},status=400)
+            user = (
+                User
+                .objects
+                .get(id = request.user.id)
+                .values(
+                    'email',
+                    'mobile_number',
+                    'name',
+                    'agreement',
+                    'invitation_code',
+                    'discount'
+                )
+            )
+            return JsonResponse({"user_profile" : user}, status=200)
         except User.DoesNotExist:
             return JsonResponse({"message" : "유저 정보가 존재하지 않습니다."},status=401)
             
 class KakaoLoginView(View):
     def get(self,request):
-        access_token = request.headers.get('Authorization',None)
+        access_token = request.headers.get('Authorization')
         url          = 'https://kapi.kakao.com/v2/user/me'
-        headers = {
+        headers      = {
             'Authorization'  :  f"Bearer {access_token}",
             'Content-type'   : 'application/x-www-form-urlencoded; charset=utf-8'
         }
-        kakao_response = requests.get(url, headers = headers)
+        kakao_response = requests.get(url, headers       = headers, timeout = 1)
         kakao_response = json.loads(kakao_response.text)
-        kakao = Social.objects.get(social_type='kakao')
+        kakao          = Social.objects.get(social_type  = 'kakao')
+
         if User.objects.filter(social_login_id=kakao, social_id= kakao_response['id']).exists():
             user      = User.objects.get(social_id=kakao_response['id'])
             token     = jwt.encode({'id' : user.id},SECRET_KEY,algorithm='HS256').decode('utf-8')
+
             return JsonResponse({"message" : "로그인 성공","token" : token},status=200)
         else:
-            return JsonResponse({"message" : "회원가입 필요","info" : kakao_response},status=200)
+            return JsonResponse({"message" : "회원가입 필요"}, status=401)
  
 class KakaoPayView(View):
     def post(self,request):
