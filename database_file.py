@@ -33,6 +33,16 @@ with open(CSV_PATH, newline='') as csvfile:
             content = row['content']
         )
 
+#CSV_PATH = './willy_csv/social_type.csv'
+#
+#with open(CSV_PATH, newline='') as csvfile:
+#    data_reader = csv.DictReader(csvfile)
+#
+#    for row in data_reader:
+#        print(row)
+#        Home.objects.create(
+#            social_type = row['social_type']
+#        )
 CSV_PATH = './willy_csv/product_headers.csv'
 
 with open(CSV_PATH, newline='') as csvfile:
@@ -44,6 +54,17 @@ with open(CSV_PATH, newline='') as csvfile:
             image_url = row['image_url'],
             title = row['title'],
             content = row['content']
+        )
+
+CSV_PATH = './willy_csv/orderstatus.csv'
+
+with open(CSV_PATH, newline='') as csvfile:
+    data_reader = csv.DictReader(csvfile)
+
+    for row in data_reader:
+        print(row)
+        OrderStatus.objects.create(
+            status = row['status']
         )
 
 CSV_PATH = './willy_csv/delivery_status.csv'
@@ -239,7 +260,9 @@ with open(CSV_PATH, newline='') as csvfile:
             question = row['question'],
             sub_question = row['sub_question'],
             image_url = row['image_url'],
-            limit = row['limit']
+            detail_question = row['detail_question'],
+            limit = row['limit'],
+            percentage = row['percentage']
         )
 
 CSV_PATH = './willy_csv/survey_answers.csv'
@@ -251,19 +274,10 @@ with open(CSV_PATH, newline='') as csvfile:
         print(row)
         SurveyAnswer.objects.create(
             survey_question = SurveyQuestion.objects.get(id=row['survey_questions_id']),
-            answer = row['answer']
-        )
-
-CSV_PATH = './willy_csv/next_questions.csv'
-
-with open(CSV_PATH, newline='') as csvfile:
-    data_reader = csv.DictReader(csvfile)
-
-    for row in data_reader:
-        print(row)
-        NextQuestion.objects.create(
-            survey_answer = SurveyAnswer.objects.get(id=row['survey_answers_id']),
-            survey_question = SurveyQuestion.objects.get(id=row['survey_questions_id'])
+            answer = row['answer'],
+            placeholder = row['placeholder'],
+            next_question = row['next_question'],
+            box = row['box']
         )
 
 CSV_PATH = './willy_csv/result_lists.csv'
@@ -450,6 +464,17 @@ with open(CSV_PATH, newline='') as csvfile:
             description = row['description']
         )
 
+CSV_PATH = './willy_csv/survey_comments.csv'
+
+with open(CSV_PATH, newline='') as csvfile:
+    data_reader = csv.DictReader(csvfile)
+
+    for row in data_reader:
+        print(row)
+        SurveyComment.objects.create(
+            survey_answer = SurveyAnswer.objects.get(id=row['survey_answers_id']),
+            comment = row['comment']
+        )
 
 
 #product_notices.csv
@@ -485,3 +510,4 @@ with open(CSV_PATH, newline='') as csvfile:
 #notices.csv
 #pilly_stories.csv
 #story_informations.csv
+#survey_comments.csv

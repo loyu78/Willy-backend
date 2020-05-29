@@ -9,10 +9,11 @@ class SurveyType(models.Model):
 class SurveyQuestion(models.Model):
     survey_type = models.ForeignKey('SurveyType', on_delete=models.SET_NULL, null=True)
     question = models.CharField(max_length=200)
+    detail_question = models.CharField(max_length=200)
     sub_question = models.CharField(max_length=200)
     image_url = models.URLField(max_length=2000, null=True)
     limit = models.CharField(max_length=30, null=True)
-    surveyquetion_surveyanswer = models.ManyToManyField('Surveyanswer', through='NextQuestion')
+    percentage = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'survey_questions'
@@ -20,16 +21,12 @@ class SurveyQuestion(models.Model):
 class SurveyAnswer(models.Model):
     survey_question = models.ForeignKey('SurveyQuestion', on_delete=models.SET_NULL, null=True)
     answer = models.CharField(max_length=200)
+    placeholder = models.CharField(max_length=50)
+    next_question = models.IntegerField(default=0)
+    box = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'survey_answers'
-
-class NextQuestion(models.Model):
-    survey_answer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
-    survey_question = models.ForeignKey('SurveyQuestion', on_delete=models.SET_NULL, null=True)
-
-    class Meta:
-        db_table = 'next_questions'
 
 class SuitablePill(models.Model):
     survey_answer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
@@ -38,21 +35,22 @@ class SuitablePill(models.Model):
     class Meta:
         db_table = 'suitable_pills'
 
-class SurveyComent(models.Model):
+class SurveyComment(models.Model):
     survey_answer = models.ForeignKey('SurveyAnswer', on_delete=models.SET_NULL, null=True)
-    coment = models.CharField(max_length=200)
+    comment = models.CharField(max_length=200)
 
     class Meta:
-        db_table = 'survey_coment'
+        db_table = 'survey_coments'
 
 class CustomerInformation(models.Model):
     user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=50)
-    gender = models.CharField(max_length=10)
-    age = models.IntegerField(default=0)
-    height = models.IntegerField(default=0)
-    weight = models.IntegerField(default=0)
-    email = models.EmailField(max_length=50)
+    name = models.CharField(max_length=50, null=True)
+    gender = models.CharField(max_length=10, null=True)
+    age = models.CharField(max_length=50, null=True)
+    height = models.CharField(max_length=50, null=True)
+    weight = models.CharField(max_length=50, null=True)
+    email = models.EmailField(max_length=50, null=True)
+    bmi = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     customerinformation_recommendedproduct = models.ManyToManyField('RecommendedProduct', through='SurveyResult')
 
     class Meta:
@@ -60,8 +58,8 @@ class CustomerInformation(models.Model):
 
 class CustomerAnswer(models.Model):
     customer_information = models.ForeignKey('CustomerInformation', on_delete=models.SET_NULL, null=True)
-    question = models.CharField(max_length=200)
-    answer = models.CharField(max_length=2000)
+    question = models.IntegerField(default=0)
+    answer = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'customer_answers'

@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import config
+import pymysql
+pymysql.version_info = (1, 3, 13, "final", 0)
+pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,28 +27,29 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config.SECRET['SECRET_KEY']
 ACCESS_KEY = config.ACCESS['ACCESS_KEY']
 ACCESS_URI = config.ACCESS['ACCESS_URI']
+token = config.token['token']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*', '10.58.4.9:8000']
 
-
 # Application definition
 
 INSTALLED_APPS = [
-#    'django.contrib.admin',
-#    'django.contrib.auth',
+#     'django.contrib.admin',
+#     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'corsheaders',
     'user',
     'product',
     'survey',
     'order',
-    'information',
+    'information'
 ]
 
 MIDDLEWARE = [
@@ -131,7 +136,7 @@ STATIC_URL = '/static/'
 
 APPEND_SLASH = False
 
-##CORS
+#CORS
 CORS_ORIGIN_ALLOW_ALL=True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = (
@@ -152,4 +157,12 @@ CORS_ALLOW_HEADERS = (
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'expires_in,',
+    'access_token',
+    'refresh_token',
+    'refresh_token_expires_in',
+    'scope',
+    'stateToken',
+    'token_type',
+    'type',
 )

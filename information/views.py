@@ -3,7 +3,7 @@ import json
 from django.views import View
 from django.http import  HttpResponse, JsonResponse
 
-from .models import Home, Notice, PillyNews, Question
+from .models import Home, Notice, PillyNews, Question, ProductHeader, PillyStory, StoryInformation
 
 class HomeView(View):
     def get(self, request):
@@ -41,7 +41,7 @@ class NewsDetailView(View):
 				'created_at':news.created_at
 			}
 		]
-		return JsonResponse({'news_list':data}, status=200)
+		return JsonResponse({'news':data}, status=200)
 
 class FAQListView(View):
 	def get(self, request):
@@ -56,3 +56,34 @@ class FAQListView(View):
 			} for question in questions
 		]
 		return JsonResponse({'faq_list':data}, status=200)
+
+class StoryView(View):
+    def get(self, request):
+        result = []
+        header_image = ProductHeader.objects.values().get(id=2)
+        result.append({'header_image':header_image})
+        category = request.GET.get('category', None)
+        story = StoryInformation.objects.all()
+        if category:
+            story_list ={'story':list(story.filter(pilly_story__name=category).values(
+                'id',
+                'image_url',
+                'pilly_story__name',
+                'title',
+                'content'
+            ))}
+        else:
+            story_list={'story':list(story.values(
+                'id',
+                'image_url',
+                'pilly_story__name',
+                'title',
+                'content'
+            ))}
+        result.append(story_list)
+        return JsonResponse({'story_list':result}, status=200)
+
+class DetailStoryView(View):
+    def get(self, request, story_id):
+        detail = StoryInformation.objects.filter(id=story_id).values()
+        return JsonResponse({'detail':list(detail)})

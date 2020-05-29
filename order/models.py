@@ -46,6 +46,7 @@ class Payment(models.Model):
         db_table = 'payments'
 
 class Cart(models.Model):
+    user = models.ForeignKey('user.User', on_delete=models.SET_NULL, null=True)
     order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField(default=1)

@@ -15,8 +15,10 @@ class User(models.Model):
     detail_address = models.CharField(max_length=100, null=True)
     discount = models.IntegerField(default=1)
     mobile_agreement = models.BooleanField(default=0)
-    account_product = models.ManyToManyField('product.Product', through='Prescription')
-    account_deliverystatus = models.ManyToManyField('order.DeliveryStatus', through='order.Order')
+    user_product = models.ManyToManyField('product.Product', through='Prescription')
+    user_deliverystatus = models.ManyToManyField('order.DeliveryStatus', through='order.Order')
+    social_id = models.IntegerField(default=0)
+    social_login = models.ForeignKey('Social', on_delete=models.SET_NULL, null=True ,default=1)
 
     class Meta:
         db_table = 'users'
@@ -60,3 +62,9 @@ class Authentication(models.Model):
 
     class Meta:
         db_table = 'authentications'
+
+class Social(models.Model):
+    social_type = models.CharField(max_length=45)
+    
+    class Meta:
+        db_table = 'social_types'
