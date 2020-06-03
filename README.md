@@ -33,7 +33,7 @@ Click the image to watch video.
 - Deployed in AWS with MySQL, RDS
 
 ## API Documentation
-- Post맨 API Documentation 업로드 예정.
+- [Post맨 API Documentation](https://documenter.getpostman.com/view/11391187/Szt8c9RT?version=latest)
 
 ## DataBase Modeling
 ![pilly modeling](https://user-images.githubusercontent.com/56547148/83351699-3eec3e80-a381-11ea-82d0-6f45534c153e.png)
