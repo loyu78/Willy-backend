@@ -4,7 +4,7 @@ Developed by a team of 6 developers (3 Front-End, 3 Back-End)<br>
 [Front-End Github Repository](https://github.com/wecode-bootcamp-korea/Willy-frontend)
 
 ## Demo
-Click the image to watch the video.
+Click the image to watch a video.
 - 비디오 업로드 예정.
 
 ## Technologies
