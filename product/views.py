@@ -82,7 +82,6 @@ class ProductView(View):
                 'category_image':list(category_image_list)
             }
             result.append(product_list)
-
         return JsonResponse({'products':result}, status =200)
 
 class ProductDetailView(View):
@@ -119,7 +118,6 @@ class ProductDetailView(View):
             'ingredient',
             'manual_url'
         )
-
         result.append({"product_list":list(products)})
 
         return JsonResponse({"product_detail":result}, status=200)

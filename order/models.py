@@ -50,7 +50,7 @@ class Cart(models.Model):
     order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey('product.Product', on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField(default=1)
-    amount = models.IntegerField(default=0)
+    price = models.DecimalField(default=0)
     survey_discount = models.IntegerField(default=0)
     invitation_discount = models.IntegerField(default=0)
 
