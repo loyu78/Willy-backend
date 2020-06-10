@@ -5,7 +5,7 @@ Developed by a team of 6 developers (3 Front-End, 3 Back-End)<br>
 
 ## Demo
 Click the image to watch a video.
-[![willy]()](https://youtu.be/0Q87dp_r9fI)
+[![willy](https://img.youtube.com/vi/0Q87dp_r9fI/0.jpg)](https://youtu.be/0Q87dp_r9fI)
 
 ## Technologies
 - Python
