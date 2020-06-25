@@ -11,6 +11,7 @@ from product.models   import Product
 from user.models      import User
 from user.utils       import sign_in_auth
 
+# 장바구니 api
 class CartView(View):
 	@sign_in_auth
 	def post(self, request):
@@ -21,6 +22,7 @@ class CartView(View):
 				product = Product.objects.get(id=product_id)
 				user = request.user
 
+                # 진행중인 주문이 있으면 해당 주문 id를 가져오고, 없으면 생성
 				if Order.objects.filter(user_id=user.id, order_status_id=1).exists():
 					order_id = Order.objects.get(user_id=user.id).id
 				else:
@@ -31,11 +33,13 @@ class CartView(View):
 
 				order_id = Order.objects.get(user_id=user.id).id
 				carts = Cart.objects.filter(order_id=order_id)
+                # 장바구니에 해당 제품이 있으면 수량, 가격을 업데이트
 				if carts.filter(product_id=product_id).exists():
 					cart_product = carts.get(product_id=product_id)
 					cart_product.quantity = cart_product.quantity + 1
 					cart_product.amount = cart_product.amount + product.price
 					cart_product.save()
+                # 없으면 장바구니에 생성
 				else:
 					Cart(
 						user_id = user.id,
@@ -47,6 +51,7 @@ class CartView(View):
 		except KeyError:
 			return JsonResponse({'message':'key error'}, status=200)
 
+    # 장바구니에 담긴 제품 보여주는 api
 	@sign_in_auth
 	def get(self, request):
 		user = request.user
@@ -74,9 +79,10 @@ class CartView(View):
 		]
 		return JsonResponse({'products':data_attribute, 'subscribe_total_price':subscribe_total_price, 'disposable_total_price':disposable_total_price,'total_price':total_price}, status=200)
 			
+# 장바구니 비우기 api
 class RemoveProducts(View):
 	@sign_in_auth
-	def get(self, request):
+	def delete(self, request):
 		user = request.user
 		carts = Cart.objects.filter(user_id=user.id)
 		if carts.exists():
@@ -84,17 +90,20 @@ class RemoveProducts(View):
 			return JsonResponse({'message':'remove success'}, status=200)
 		return JsonResponse({'message':'invalid'}, status=400)
 
+# 장바구니에 담긴 제품 1개씩 지우는 api
 class RemoveProduct(View):
 	@sign_in_auth
-	def get(self, request, product_id):
+	def delete(self, request, product_id):
 		try:
 			user = request.user
 			cart = Cart.objects.filter(user_id=user.id)
 			if cart.exists():
 				product = cart.get(product_id=product_id)
+                # 수량이 1개면 완전히 지우기
 				if product.quantity == 1:
 					product.delete()
 					return JsonResponse({'message':'remove success'}, status=200)
+                # 수량이 2개 이상이면 1개만 지우고 수량, 가격 수정
 				if product:
 					product.quantity = product.quantity - 1
 					product.amount = product.amount - product.product.price

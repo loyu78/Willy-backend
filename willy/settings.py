@@ -32,7 +32,7 @@ token = config.token['token']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '10.58.4.9:8000']
+ALLOWED_HOSTS = ['*', '10.58.2.56:8000']
 
 # Application definition
 

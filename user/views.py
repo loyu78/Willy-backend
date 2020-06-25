@@ -17,6 +17,7 @@ from .utils import make_signature, sign_in_auth
 from .models import Authentication, User,Social
 from .models import PointProduct, PointImageList
 
+# 포인트 몰 상품 리스트 api
 class PointProductList(View):
 	def get(self, request):
 		products = PointProduct.objects.values()
@@ -32,6 +33,7 @@ class PointProductList(View):
 		]
 		return JsonResponse({'point_products':point_products}, status=200)
 
+# 포인트 몰 상품 디테일 api
 class PointProductDetail(View):
 	def get(self, request, product_id):
 		try:
@@ -112,44 +114,46 @@ class SignUpView(View):
 class SignInView(View):
     def post(self, request):
         data = json.loads(request.body)
-        judge = {}
-        for i in data:
-            if len(data[i]) == 0:
-                judge[i] = True
-        if len(judge) == 2 and 'password' in judge:
-            return JsonResponse({"message": "패스워드를 입력 해주세요."},status=400)
-        if len(judge) == 3 :
-            return JsonResponse({"message": "로그인 정보를 입력 해 주세요."},status=400)
-        if 'mobile_number' in judge:
-            try:
-                if User.objects.filter(email = data['email']).exists():
-                    user = User.objects.get(email = data['email'])
+        # judge = {}
+        # for i in data:
+        #     if len(data[i]) == 0:
+        #         judge[i] = True
+        # if len(judge) == 2 and 'password' in judge:
+        #     return JsonResponse({"message": "패스워드를 입력 해주세요."},status=400)
+        # if len(judge) == 3 :
+        #     return JsonResponse({"message": "로그인 정보를 입력 해 주세요."},status=400)
+        # if 'mobile_number' in judge:
+        try:
+            if User.objects.filter(email = data['email']).exists():
+                user = User.objects.get(email = data['email'])
 
-                    if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
-                        token = jwt.encode(
-                            {'user_id':user.id}, SECRET_KEY, algorithm='HS256').decode('utf-8')
-                        return JsonResponse({"token":token},status=200)
-                    else:
-                        return JsonResponse({"message" : "패스워드가 틀립니다."}, status=400)
-                return JsonResponse({'message' : "이메일이 존재하지 않습니다."}, status=401)
-            except KeyError:
-                return JsonResponse({'message':"INVALID_KEYS"},status=400)
-            return JsonResponse({"message" : "error"}, status=400)
+                if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
+                    token = jwt.encode(
+                        {'user_id':user.id}, SECRET_KEY, algorithm='HS256').decode('utf-8')
+                    return JsonResponse({"token":token},status=200)
+                else:
+                    return JsonResponse({"message" : "패스워드가 틀립니다."}, status=400)
+            return JsonResponse({'message' : "이메일이 존재하지 않습니다."}, status=401)
+        except KeyError:
+            return JsonResponse({'message':"INVALID_KEYS"},status=400)
+        return JsonResponse({"message" : "error"}, status=400)
+        # return JsonResponse({"message" : "error"}, status=400)
 
-        if 'email' in judge:
-            try:
-                if User.objects.filter(mobile_number = data['mobile_number']).exists():
-                    user = User.objects.get(mobile_number = data['mobile_number'])
-                    if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
-                        token = jwt.encode(
-                            {'user_id':user.id}, SECRET_KEY, algorithm='HS256').decode('utf-8')
-                        return JsonResponse({"token":token},status=200)
-                    else:
-                        return JsonResponse({"message":"패스워드가 틀립니다."},status=400)
-                return JsonResponse({'message' : "핸드폰이 존재하지 않습니다."}, status=401)
-            except KeyError:
-                return JsonResponse({'message':"INVALID_KEYS"},status=400)
-            return JsonResponse({"message" : "error"},status=400 )
+        # if 'email' in judge:
+        #     try:
+        #         if User.objects.filter(mobile_number = data['mobile_number']).exists():
+        #             user = User.objects.get(mobile_number = data['mobile_number'])
+        #             if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
+        #                 token = jwt.encode(
+        #                     {'user_id':user.id}, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        #                 return JsonResponse({"token":token},status=200)
+        #             else:
+        #                 return JsonResponse({"message":"패스워드가 틀립니다."},status=400)
+        #         return JsonResponse({'message' : "핸드폰이 존재하지 않습니다."}, status=401)
+        #     except KeyError:
+        #         return JsonResponse({'message':"INVALID_KEYS"},status=400)
+        #     return JsonResponse({"message" : "error"},status=400)
+        # return JsonResponse({"message": "error"},status=400)
 
 class SmsSendView(View):
     timestamp = str(int(time.time() * 1000))
