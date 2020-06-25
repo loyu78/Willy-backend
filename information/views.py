@@ -10,12 +10,14 @@ class HomeView(View):
         home_list = Home.objects.all().values()
         return JsonResponse({'home_list':list(home_list)}, status=200)
 
+# 약관 api 
 class NoticeView(View):
 	def get(self, request):
 		terms = request.GET.get('terms', '이용약관')
 		notices = Notice.objects.filter(title=terms).values()
 		return JsonResponse({'terms':list(notices)}, status=200)
 
+# 필리 소식 리스트 api
 class NewsListView(View):
 	def get(self, request):
 		news_list = PillyNews.objects.all()
@@ -29,6 +31,7 @@ class NewsListView(View):
 		]
 		return JsonResponse({'news_list':data}, status=200)
 
+# 필리 소식 상세 api
 class NewsDetailView(View):
 	def get(self, request, news_id):
 		news = PillyNews.objects.get(id=news_id)
@@ -43,6 +46,7 @@ class NewsDetailView(View):
 		]
 		return JsonResponse({'news':data}, status=200)
 
+# 자주 묻는 질문 api
 class FAQListView(View):
 	def get(self, request):
 		questions = Question.objects.all()

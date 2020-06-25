@@ -6,6 +6,7 @@ from django.http        import HttpResponse, JsonResponse
 from .models            import Product, Review, ProductReview, ProductExplanation, Category, ProductCategory, ProductExplanation, Review, Section, Material, FrequentQuestion, Explanation
 from information.models import ProductHeader
 
+# 고객 후기 리스트 api
 class ReviewList(View):
 	def get(self, request):
 		product = request.GET.get('product', Review.objects.all())
@@ -30,6 +31,7 @@ class ReviewList(View):
 		except KeyError:
 			return JsonResponse({'message':'key error'}, status=400)
 
+# 고객 후기 상세 api
 class ReviewDetail(View):
 	def get(self, request, review_id):
 		try:
